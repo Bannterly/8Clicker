@@ -25,5 +25,6 @@ Make sure to select the middle one, Jar2. Should already be added onto the proje
 
 ![image](https://github.com/user-attachments/assets/539f968c-824c-4166-b34f-c05c81b7286d)
 
-Link to download it: https://download.java.net/java/GA/jdk23.0.1/c28985cbf10d4e648e4004050f8781aa/11/GPL/openjdk-23.0.1_windows-x64_bin.zip
+Link to download it: 
+https://download.java.net/java/GA/jdk23.0.1/c28985cbf10d4e648e4004050f8781aa/11/GPL/openjdk-23.0.1_windows-x64_bin.zip
 I've used jdk 23 for this too. 
