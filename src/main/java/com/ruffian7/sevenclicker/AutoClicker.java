@@ -33,8 +33,15 @@ public class AutoClicker {
     public static boolean randomizer = false;
     public static boolean rightEnabled = false;
 
+    // Add right click specific variables
+    public static boolean rightToggled = false;
+    public static boolean rightActivated = false;
+    public static boolean rightSkipNext = false;
+
     private static int delay = -1;
+    private static int rightDelay = -1;
     public static long lastTime = 0;
+    public static long rightLastTime = 0;
     public static int minCPS = 8;
     public static int maxCPS = 12;
     public static int rightMinCPS = 8;
@@ -92,33 +99,43 @@ public class AutoClicker {
                     long currentTime = System.currentTimeMillis();
                     if (currentTime - lastTime >= delay) {
                         if (!skipNext) {
-                            click();
+                            click(true); // Left click
                         }
                         skipNext = false;
                         lastTime = currentTime;
 
-                        // Calculate next delay based on CPS settings
-                        if (button == 1) {
-                            delay = (int) (1000.0 / (randomizer ?
-                                    (random.nextInt(maxCPS - minCPS + 1) + minCPS) :
-                                    ((maxCPS + minCPS) / 2.0)));
-                        } else {
-                            delay = (int) (1000.0 / (randomizer ?
-                                    (random.nextInt(rightMaxCPS - rightMinCPS + 1) + rightMinCPS) :
-                                    ((rightMaxCPS + rightMinCPS) / 2.0)));
-                        }
-                    }
-                } else {
-                    lastTime = System.currentTimeMillis();
-                    if (button == 1) {
                         delay = (int) (1000.0 / (randomizer ?
                                 (random.nextInt(maxCPS - minCPS + 1) + minCPS) :
                                 ((maxCPS + minCPS) / 2.0)));
-                    } else {
-                        delay = (int) (1000.0 / (randomizer ?
+                    }
+                } else {
+                    lastTime = System.currentTimeMillis();
+                    delay = (int) (1000.0 / (randomizer ?
+                            (random.nextInt(maxCPS - minCPS + 1) + minCPS) :
+                            ((maxCPS + minCPS) / 2.0)));
+                }
+            }
+
+            // Right click logic
+            if (rightEnabled && rightToggled && (!minecraftOnly || isMinecraftFocused())) {
+                if (rightActivated) {
+                    long currentTime = System.currentTimeMillis();
+                    if (currentTime - rightLastTime >= rightDelay) {
+                        if (!rightSkipNext) {
+                            click(false); // Right click
+                        }
+                        rightSkipNext = false;
+                        rightLastTime = currentTime;
+
+                        rightDelay = (int) (1000.0 / (randomizer ?
                                 (random.nextInt(rightMaxCPS - rightMinCPS + 1) + rightMinCPS) :
                                 ((rightMaxCPS + rightMinCPS) / 2.0)));
                     }
+                } else {
+                    rightLastTime = System.currentTimeMillis();
+                    rightDelay = (int) (1000.0 / (randomizer ?
+                            (random.nextInt(rightMaxCPS - rightMinCPS + 1) + rightMinCPS) :
+                            ((rightMaxCPS + rightMinCPS) / 2.0)));
                 }
             }
 
@@ -134,50 +151,59 @@ public class AutoClicker {
         char[] windowText = new char[512];
         HWND hwnd = User32.INSTANCE.GetForegroundWindow();
         User32.INSTANCE.GetWindowText(hwnd, windowText, 512);
-        String activeWindowTitle = Native.toString(windowText);
+        String activeWindowTitle = Native.toString(windowText).toLowerCase();
 
-        return activeWindowTitle.contains("Minecraft");
+        return activeWindowTitle.contains("minecraft") ||
+                activeWindowTitle.contains("lunar client") ||
+                activeWindowTitle.contains("badlion") ||
+                activeWindowTitle.contains("forge") ||
+                activeWindowTitle.contains("pvplounge");
     }
 
-    private static void click() {
-        skipNext = true;
+    private static void click(boolean isLeftClick) {
+        if (isLeftClick) {
+            skipNext = true;
+        } else {
+            rightSkipNext = true;
+        }
+
+        int mouseButton = isLeftClick ? 16 : 4;
+        int oppositeButton = isLeftClick ? 4 : 16;
 
         if (randomizer) {
-            // Random chance to skip a click (10-20% chance)
             if (random.nextDouble() < 0.15) {
                 return;
             }
 
-            // Add random delay between press and release (0-25ms)
-            robot.mousePress((button == 1) ? 16 : 4);
+            robot.mousePress(mouseButton);
             try {
                 Thread.sleep(random.nextInt(25));
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            robot.mouseRelease((button == 1) ? 16 : 4);
+            robot.mouseRelease(mouseButton);
 
-            if (blockHit) {
+            if (blockHit && isLeftClick) {
                 try {
                     Thread.sleep(random.nextInt(50));
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                robot.mousePress((button == 1) ? 4 : 16);
+                robot.mousePress(oppositeButton);
                 try {
                     Thread.sleep(random.nextInt(25));
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                robot.mouseRelease((button == 1) ? 4 : 16);
+                robot.mouseRelease(oppositeButton);
             }
         } else {
-            robot.mousePress((button == 1) ? 16 : 4);
-            robot.mouseRelease((button == 1) ? 16 : 4);
+            robot.mousePress(mouseButton);
+            robot.mouseRelease(mouseButton);
 
-            if (blockHit) {
-                robot.mousePress((button == 1) ? 4 : 16);
-                robot.mouseRelease((button == 1) ? 4 : 16);
+            if (blockHit && isLeftClick) {
+                robot.mousePress(oppositeButton);
+                robot.mouseRelease(oppositeButton);
             }
         }
     }
@@ -205,8 +231,20 @@ public class AutoClicker {
             AutoClicker.toggled = true;
         }
 
+        AutoClicker.gui.updateTitle(AutoClicker.toggled);
         AutoClicker.activated = false;
         AutoClicker.skipNext = false;
         AutoClicker.blockHit = false;
+    }
+
+    public static void toggleRight() {
+        if (AutoClicker.rightToggled) {
+            AutoClicker.rightToggled = false;
+        } else {
+            AutoClicker.rightToggled = true;
+        }
+
+        AutoClicker.rightActivated = false;
+        AutoClicker.rightSkipNext = false;
     }
 }
