@@ -18,6 +18,10 @@ import com.ruffian7.sevenclicker.AutoClicker;
 
 public class ClickerGui {
 
+
+    private final String BASE_TITLE = "8Clicker";
+    private final String ACTIVE_INDICATOR = " [ON]";
+
     private final int WINDOW_WIDTH = 300;
     private final int WINDOW_HEIGHT = 360;
 
@@ -119,6 +123,11 @@ public class ClickerGui {
         // Setup toggle key field
         setupToggleKeyField();
     }
+
+    public void updateTitle(boolean isActive) {
+        titleText.setText(BASE_TITLE + (isActive ? ACTIVE_INDICATOR : ""));
+    }
+
 
     private void setupCPSFieldListeners(JTextField field, boolean isMin, boolean isRight) {
         field.addActionListener(e -> {
@@ -397,6 +406,7 @@ public class ClickerGui {
         titleText.setBounds(0, 0, WINDOW_WIDTH, 30);
         titleText.setHorizontalAlignment(SwingConstants.CENTER);
         titleText.setForeground(Color.WHITE);
+        titleText.setText(BASE_TITLE); // Update
         titleBar.add(titleText);
     }
 
