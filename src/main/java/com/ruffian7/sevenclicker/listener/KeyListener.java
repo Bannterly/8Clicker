@@ -1,7 +1,9 @@
 package com.ruffian7.sevenclicker.listener;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.jnativehook.keyboard.NativeKeyEvent;
 import org.jnativehook.keyboard.NativeKeyListener;
@@ -9,21 +11,29 @@ import org.jnativehook.keyboard.NativeKeyListener;
 import com.ruffian7.sevenclicker.AutoClicker;
 
 public class KeyListener implements NativeKeyListener {
+	private final Set<Integer> pressedKeys = new HashSet<>();
 
 	@Override
 	public void nativeKeyPressed(NativeKeyEvent event) {
-		List<String> modifiers1 = Arrays.asList(NativeKeyEvent.getModifiersText(event.getModifiers()).split("\\+"));
-		List<String> modifiers2 = Arrays.asList(AutoClicker.toggleKey[1].split("\\+"));
+		//  the key text and modifiers
+		String keyText = NativeKeyEvent.getKeyText(event.getKeyCode());
+		String modifiersText = NativeKeyEvent.getModifiersText(event.getModifiers());
 
-		if (NativeKeyEvent.getKeyText(event.getKeyCode()).equals(AutoClicker.toggleKey[0])
-				&& modifiers1.containsAll(modifiers2) && !AutoClicker.gui.focused) {
-			AutoClicker.toggle();
+		String targetKey = AutoClicker.toggleKey[0];
+		String targetModifiers = AutoClicker.toggleKey[1];
+
+		// if the pressed key matches the toggle key
+		if (keyText.equals(targetKey) && !AutoClicker.gui.focused) {
+			// no modifiers are required or if the modifiers match
+			if (targetModifiers.isEmpty() || modifiersText.equals(targetModifiers)) {
+				AutoClicker.toggle();
+			}
 		}
 	}
 
 	@Override
 	public void nativeKeyReleased(NativeKeyEvent event) {
-		// NO-OP
+		pressedKeys.remove(event.getKeyCode());
 	}
 
 	@Override
