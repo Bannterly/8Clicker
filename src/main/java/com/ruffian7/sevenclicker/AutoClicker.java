@@ -55,19 +55,8 @@ public class AutoClicker {
 
     public static void main(String[] args) {
         try {
-            // Add basic logging
-            System.out.println("Starting 7Clicker...");
-
-
-            System.out.println("Java version: " + System.getProperty("java.version"));
-            System.out.println("Working directory: " + System.getProperty("user.dir"));
-
             Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
-            System.out.println("Thread priority set to maximum");
-
             configManager = new ConfigManager();
-            System.out.println("Config manager initialized");
-
             try {
                 // Load saved config values
                 toggleKey[0] = configManager.getProperty("toggleKey1", "");
@@ -194,56 +183,60 @@ public class AutoClicker {
                 activeWindowTitle.contains("pvp");
     }
 
-    private static void click(boolean isLeftClick) {
-        if (isLeftClick) {
-            skipNext = true;
-            System.out.println("Performing left click");
-        } else {
-            rightSkipNext = true;
-            System.out.println("Performing right click");
-        }
-
-        int mouseButton = isLeftClick ? 16 : 4;
-        int oppositeButton = isLeftClick ? 4 : 16;
-
-        if (randomizer) {
-            if (random.nextDouble() < 0.15) {
-                System.out.println("Click skipped by randomizer");
-                return;
+ private static void click(boolean isLeftClick) {
+        try {
+            if (isLeftClick) {
+                skipNext = true;
+            } else {
+                rightSkipNext = true;
             }
 
-            robot.mousePress(mouseButton);
-            try {
-                Thread.sleep(random.nextInt(25));
-            } catch (InterruptedException _) {
+            int mouseButton = isLeftClick ? 16 : 4;
+            int oppositeButton = isLeftClick ? 4 : 16;
 
-            }
-            robot.mouseRelease(mouseButton);
-
-            if (blockHit && isLeftClick) {
-                System.out.println("Performing block hit");
-                try {
-                    Thread.sleep(random.nextInt(50));
-                } catch (InterruptedException _) {
-
+            if (randomizer) {
+                if (random.nextDouble() < 0.15) {
+                    return;
                 }
-                robot.mousePress(oppositeButton);
+
+                // Ensure press and release always happen
                 try {
-                    Thread.sleep(random.nextInt(25));
-                } catch (InterruptedException _) {
-
+                    robot.mousePress(mouseButton);
+                    Thread.sleep(random.nextInt(15) + 5); // 5-20ms delay
+                } finally {
+                    robot.mouseRelease(mouseButton);
                 }
-                robot.mouseRelease(oppositeButton);
-            }
-        } else {
-            robot.mousePress(mouseButton);
-            robot.mouseRelease(mouseButton);
 
-            if (blockHit && isLeftClick) {
-                System.out.println("Performing block hit");
-                robot.mousePress(oppositeButton);
-                robot.mouseRelease(oppositeButton);
+                if (blockHit && isLeftClick) {
+                    Thread.sleep(random.nextInt(30) + 10); // 10-40ms delay
+                    try {
+                        robot.mousePress(oppositeButton);
+                        Thread.sleep(random.nextInt(15) + 5);
+                    } finally {
+                        robot.mouseRelease(oppositeButton);
+                    }
+                }
+            } else {
+                try {
+                    robot.mousePress(mouseButton);
+                    Thread.sleep(5); // Small consistent delay
+                } finally {
+                    robot.mouseRelease(mouseButton);
+                }
+
+                if (blockHit && isLeftClick) {
+                    Thread.sleep(10);
+                    try {
+                        robot.mousePress(oppositeButton);
+                        Thread.sleep(5);
+                    } finally {
+                        robot.mouseRelease(oppositeButton);
+                    }
+                }
             }
+        } catch (Exception e) {
+            System.err.println("Error during click: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
