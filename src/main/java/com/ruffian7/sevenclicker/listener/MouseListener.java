@@ -43,9 +43,9 @@ public class MouseListener implements NativeMouseListener {
 			if (lastClickTime == 0) {
 				lastClickTime = System.currentTimeMillis();
 			} else if (System.currentTimeMillis() != lastClickTime) {
-				int cps = Math.round(1000.0f / (System.currentTimeMillis() - lastClickTime));
-				
-				lastClickTime = 0;
+                System.currentTimeMillis();
+
+                lastClickTime = 0;
 			}
 		}
 	}
