@@ -1,8 +1,8 @@
 package com.ruffian7.sevenclicker.listener;
 
-import java.util.Arrays;
+
 import java.util.HashSet;
-import java.util.List;
+
 import java.util.Set;
 
 import org.jnativehook.keyboard.NativeKeyEvent;
@@ -10,6 +10,7 @@ import org.jnativehook.keyboard.NativeKeyListener;
 
 import com.ruffian7.sevenclicker.AutoClicker;
 
+@SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
 public class KeyListener implements NativeKeyListener {
 	private final Set<Integer> pressedKeys = new HashSet<>();
 
