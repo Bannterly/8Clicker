@@ -9,6 +9,7 @@ import java.awt.Toolkit;
 import java.awt.event.*;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Objects;
 import javax.swing.*;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.AttributeSet;
@@ -20,7 +21,6 @@ public class ClickerGui {
 
 
     private final String BASE_TITLE = "8Clicker";
-    private final String ACTIVE_INDICATOR = " [ON]";
 
     private final int WINDOW_WIDTH = 300;
     private final int WINDOW_HEIGHT = 360;
@@ -42,7 +42,7 @@ public class ClickerGui {
     public JTextField maxCPSField = new JTextField("12", 2);
     public JTextField rightMinCPSField = new JTextField("8", 2);
     public JTextField rightMaxCPSField = new JTextField("12", 2);
-    public JTextField toggleKeyField = new JTextField("Enter Keybind");
+    public JTextField toggleKeyField = new JTextField("Enter Key bind");
 
     public JCheckBox overlayBox = new JCheckBox("Overlay", true);
     public JCheckBox rightClickBox = new JCheckBox("Right Click", false);
@@ -125,12 +125,13 @@ public class ClickerGui {
     }
 
     public void updateTitle(boolean isActive) {
+        String ACTIVE_INDICATOR = " [ON]";
         titleText.setText(BASE_TITLE + (isActive ? ACTIVE_INDICATOR : ""));
     }
 
 
     private void setupCPSFieldListeners(JTextField field, boolean isMin, boolean isRight) {
-        field.addActionListener(e -> {
+        field.addActionListener(_ -> {
             textFieldSetCPS(isMin, isRight);
             saveSettings();
         });
@@ -150,7 +151,7 @@ public class ClickerGui {
         overlayBox.setBackground(LIGHT_GRAY);
         overlayBox.setForeground(Color.WHITE);
         setupCheckboxIcon(overlayBox);
-        overlayBox.addActionListener(e -> frame.setAlwaysOnTop(overlayBox.isSelected()));
+        overlayBox.addActionListener(_ -> frame.setAlwaysOnTop(overlayBox.isSelected()));
         mainPane.add(overlayBox);
 
         // Right click enable checkbox
@@ -158,7 +159,7 @@ public class ClickerGui {
         rightEnabledBox.setBackground(LIGHT_GRAY);
         rightEnabledBox.setForeground(Color.WHITE);
         setupCheckboxIcon(rightEnabledBox);
-        rightEnabledBox.addActionListener(e -> {
+        rightEnabledBox.addActionListener(_ -> {
             AutoClicker.rightEnabled = rightEnabledBox.isSelected();
             saveSettings();
         });
@@ -169,7 +170,7 @@ public class ClickerGui {
         minecraftOnlyBox.setBackground(LIGHT_GRAY);
         minecraftOnlyBox.setForeground(Color.WHITE);
         setupCheckboxIcon(minecraftOnlyBox);
-        minecraftOnlyBox.addActionListener(e -> {
+        minecraftOnlyBox.addActionListener(_ -> {
             AutoClicker.minecraftOnly = minecraftOnlyBox.isSelected();
             saveSettings();
         });
@@ -180,7 +181,7 @@ public class ClickerGui {
         randomizerBox.setBackground(LIGHT_GRAY);
         randomizerBox.setForeground(Color.WHITE);
         setupCheckboxIcon(randomizerBox);
-        randomizerBox.addActionListener(e -> {
+        randomizerBox.addActionListener(_ -> {
             AutoClicker.randomizer = randomizerBox.isSelected();
             saveSettings();
         });
@@ -191,7 +192,7 @@ public class ClickerGui {
         resetDefaultsBox.setBackground(LIGHT_GRAY);
         resetDefaultsBox.setForeground(Color.WHITE);
         setupCheckboxIcon(resetDefaultsBox);
-        resetDefaultsBox.addActionListener(e -> {
+        resetDefaultsBox.addActionListener(_ -> {
             if (resetDefaultsBox.isSelected()) {
                 resetToDefaults();
                 resetDefaultsBox.setSelected(false);
@@ -201,8 +202,8 @@ public class ClickerGui {
     }
 
     private void setupCheckboxIcon(JCheckBox checkbox) {
-        checkbox.setIcon(new ImageIcon(AutoClicker.class.getClassLoader().getResource("assets/checkbox_unchecked.png")));
-        checkbox.setSelectedIcon(new ImageIcon(AutoClicker.class.getClassLoader().getResource("assets/checkbox_checked.png")));
+        checkbox.setIcon(new ImageIcon(Objects.requireNonNull(AutoClicker.class.getClassLoader().getResource("assets/checkbox_unchecked.png"))));
+        checkbox.setSelectedIcon(new ImageIcon(Objects.requireNonNull(AutoClicker.class.getClassLoader().getResource("assets/checkbox_checked.png"))));
     }
 
     private void resetToDefaults() {
@@ -318,7 +319,7 @@ public class ClickerGui {
             keyText.append(AutoClicker.toggleKey[0]);
             toggleKeyField.setText(keyText.toString());
         } else {
-            toggleKeyField.setText("Enter Keybind");
+            toggleKeyField.setText("Enter Key bind");
         }
     }
 
@@ -348,7 +349,7 @@ public class ClickerGui {
         frame.setAlwaysOnTop(true);
         frame.setResizable(false);
 
-        ImageIcon icon = new ImageIcon(AutoClicker.class.getClassLoader().getResource("assets/7Clicker.png"));
+        ImageIcon icon = new ImageIcon(Objects.requireNonNull(AutoClicker.class.getClassLoader().getResource("assets/7Clicker.png")));
         frame.setIconImage(icon.getImage());
 
         frame.addWindowFocusListener(new WindowAdapter() {
@@ -365,12 +366,10 @@ public class ClickerGui {
             }
         });
 
-        Toolkit.getDefaultToolkit().addAWTEventListener(new AWTEventListener() {
-            public void eventDispatched(AWTEvent event) {
-                if (event.getID() == MouseEvent.MOUSE_CLICKED) {
-                    if (!(((MouseEvent) event).getSource() instanceof JTextField)) {
-                        KeyboardFocusManager.getCurrentKeyboardFocusManager().clearGlobalFocusOwner();
-                    }
+        Toolkit.getDefaultToolkit().addAWTEventListener(event -> {
+            if (event.getID() == MouseEvent.MOUSE_CLICKED) {
+                if (!(event.getSource() instanceof JTextField)) {
+                    KeyboardFocusManager.getCurrentKeyboardFocusManager().clearGlobalFocusOwner();
                 }
             }
         }, AWTEvent.MOUSE_EVENT_MASK);
@@ -431,13 +430,12 @@ public class ClickerGui {
             }
 
             @Override
-            public void remove(FilterBypass fb, int offset, int length) throws BadLocationException {
+            public void remove(FilterBypass fb, int offset, int length) {
                 // NO-OP
             }
 
             @Override
-            public void insertString(FilterBypass fb, int offset, String string, AttributeSet attributes)
-                    throws BadLocationException {
+            public void insertString(FilterBypass fb, int offset, String string, AttributeSet attributes) {
                 // NO-OP
             }
         });
@@ -446,17 +444,17 @@ public class ClickerGui {
             @Override
             public void keyPressed(KeyEvent e) {
                 try {
-                    if (!KeyEvent.getKeyModifiersText(e.getModifiers()).contains(KeyEvent.getKeyText(e.getKeyCode()))
+                    if (!InputEvent.getModifiersExText(e.getModifiersEx()).contains(KeyEvent.getKeyText(e.getKeyCode()))
                             && e.getKeyCode() != KeyEvent.VK_CAPS_LOCK) {
                         AutoClicker.toggleKey[0] = KeyEvent.getKeyText(e.getKeyCode());
-                        AutoClicker.toggleKey[1] = KeyEvent.getKeyModifiersText(e.getModifiers());
+                        AutoClicker.toggleKey[1] = InputEvent.getModifiersExText(e.getModifiersEx());
                         AutoClicker.toggleMouseButton = -1;
                         ((AbstractDocument) toggleKeyField.getDocument()).replace(-1, -1,
-                                getKeyString(e.getKeyCode(), e.getModifiers()), null);
+                                getKeyString(e.getKeyCode(), e.getModifiersEx()), null);
                         saveSettings();
                     }
-                } catch (BadLocationException ex) {
-                    ex.printStackTrace();
+                } catch (BadLocationException _) {
+                  
                 }
             }
         });
@@ -473,8 +471,8 @@ public class ClickerGui {
                                 "Mouse " + ((e.getButton() == 2) ? 3 : e.getButton()), null);
                         saveSettings();
                     }
-                } catch (BadLocationException ex) {
-                    ex.printStackTrace();
+                } catch (BadLocationException _) {
+                  
                 }
             }
         });
@@ -486,6 +484,7 @@ public class ClickerGui {
         try {
             GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
             InputStream fontFile = AutoClicker.class.getClassLoader().getResourceAsStream("assets/BebasNeue.otf");
+            assert fontFile != null;
             Font font = Font.createFont(Font.TRUETYPE_FONT, fontFile);
             ge.registerFont(font);
             fontFile.close();
@@ -505,8 +504,8 @@ public class ClickerGui {
             rightMinCPSField.setFont(new Font("arial", Font.PLAIN, 12));
             rightMaxCPSField.setFont(new Font("arial", Font.PLAIN, 12));
             toggleKeyField.setFont(new Font("arial", Font.PLAIN, 12));
-        } catch (IOException | FontFormatException e) {
-            e.printStackTrace();
+        } catch (IOException | FontFormatException _) {
+
         }
 
         frame.add(titleBar);
@@ -515,7 +514,7 @@ public class ClickerGui {
     }
 
     private String getKeyString(int keyCode, int modifiers) {
-        String modifiersString = KeyEvent.getKeyModifiersText(modifiers).replace("+", "");
+        String modifiersString = InputEvent.getModifiersExText(modifiers).replace("+", "");
         String keyString;
 
         if (keyCode == 0) {
